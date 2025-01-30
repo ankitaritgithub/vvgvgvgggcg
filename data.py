@@ -3,43 +3,85 @@ import subprocess
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.tools import tool
 import uuid
+from pydantic import BaseModel
+from typing import List
 
 
-@tool
-def get_user_credentials(query: str = "") -> dict:
-    """Get user email and password through interactive prompts."""
-    email = input("Please enter your email: ")
-    password = input("Please enter your password: ")
-    return {"email": email, "password": password}
+class Credential(BaseModel):
+    email: str
+    password: str
+
+
 
 test_cases = []
+
 def get_test_case(query: str):
     """Fetch the test case based on the user query from a dictionary."""
     test_cases = {
-        "valid": "valid_logins",
+        "login":"test_login",
+        "valid": "valid_login",
         "debug": "test_debug",
         "ui": "test_ui",
         "headed": "test_headed",
         "invalid": "invalid_login",
-        "login": "test_login",
-        "report": "test_report",
-        "json": "test_json",
+        "credential": "login_with_credential",
+        "generated details": "login_with_csv",
+        "report" : "test_report",
+        "default": "test_default"
     }
-
+    
     if query.lower() in test_cases:
+        print(f"Found test case: {test_cases[query.lower()]}")
         return test_cases[query.lower()]
     
     for key in test_cases:
         if key.lower() in query.lower():
+            print(f"Found test case via partial match: {test_cases[key]}")
             return test_cases[key]
     
+    print("No matching test case found. Using default.")
     return test_cases["default"]
+
+# @tool
+# def overwrite_file(test_file: str, new_content: str) -> str:
+#     """This tool overwrites the content of a file with the provided new content."""
+#     try:
+#         os.makedirs(os.path.dirname("tests/test2.spec.js"), exist_ok=True)
+        
+
+#         test_file = os.path.join('tests', 'test2.spec.js')
+#         with open(test_file, 'w') as file:
+#             file.write(new_content)
+        
+#         return f"File '{test_file}' has been successfully overwritten."
+#     except Exception as e:
+#         return f"An error occurred: {e}"
+
+@tool
+def create_and_save_file(testdata: str, content: str, mode: str = 'w'):
+    """Create the folder 'testdata' and file 'testdata.csv' if they don't exist,
+       open it, write content, and save it."""
+    try:
+        folder_name = os.path.dirname(f"testdata/{testdata}")
+        if folder_name and not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+            print(f"The folder '{folder_name}' was created.")
+            
+        file_path = os.path.join(folder_name, testdata)
+
+        with open(file_path, mode) as file:
+            file.write(content)
+        
+        print(f"Content has been successfully written to '{testdata}'")
+    except Exception as e:
+        print(f"An error occurred while handling the file: {e}")
 
 
 @tool
-def run_playwright_commands(query: str):
+def run_playwright_commands(query: str, credentials: List[Credential]):
     """Search for specific commands based on user input."""
     test_case = get_test_case(query)
     print(f"Test case '{test_case}' detected. Running corresponding Playwright Tests...")
@@ -55,13 +97,19 @@ def run_playwright_commands(query: str):
             "test_command": "npx playwright test --debug"
         },
         "invalid_login": {
-            "test_command": "npx playwright test tests/test1.spec.js"
+            "test_command": "npx playwright test tests/invalidlogin.spec.js"
         },
         "test_ui": {
             "test_command": "npx playwright test --ui"
         },
         "test_login": {
             "test_command": "npx playwright test --reporter=list"
+        },
+        "login_with_credential":{
+            "test_command": "npx playwright test tests/test2.spec.js --reporter=list"
+        },
+        "login_with_csv" : {
+            "test_command": "npx playwright test tests/csvlogin.spec.js --reporter=list"
         },
         "test_report": {
             "test_command": "npx playwright test --reporter=html",
@@ -83,25 +131,18 @@ def run_playwright_commands(query: str):
                 print(f"\nError getting model suggestion: {e}")
                 print("Please try a different test case or check the available test cases.")
                 return
-
-        if test_case == "test_login":
-            print("Running login test...")
-
-            os.makedirs('tests', exist_ok=True)
-
-            credentials = get_user_credentials.invoke(input="")
-            email = credentials["email"]
-            password = credentials["password"]
             
-            print(f"Running login test with email: {email}, password: {password}")
 
+        if test_case == "login_with_credential":
+            os.makedirs('tests', exist_ok=True)
+            print(f"Running login test with email: {credentials[0].email}, password: {credentials[0].password}")
             test_content = f"""
 import {{ test, expect }} from '@playwright/test';
 
 test('login test', async ({{ page }}) => {{
     await page.goto('https://dev.typ.delivery/en/auth/login');
-    await page.getByPlaceholder('Email').fill('{email}');
-    await page.getByPlaceholder('Password').fill('{password}');
+    await page.getByPlaceholder('Email').fill('{credentials[0].email}');
+    await page.getByPlaceholder('Password').fill('{credentials[0].password}');
     await page.getByRole('button', {{ name: 'Sign in' }}).click();
 }});
 """
@@ -109,8 +150,10 @@ test('login test', async ({{ page }}) => {{
             test_file = os.path.join('tests', 'test2.spec.js')
             with open(test_file, 'w') as f:
                 f.write(test_content)
-
+                print("Test file written successfully.")
+            
             test_command = commands[test_case]["test_command"]
+            print(f"Executing command: {test_command}")
             subprocess.run(test_command.split())
 
         else:
@@ -151,24 +194,24 @@ test('login test', async ({{ page }}) => {{
     except Exception as e:
         print(f"\nAn unexpected error occurred: {e}")
 
+    return True
 
-tools = [run_playwright_commands, get_user_credentials]
+# Define tools
 
-api_key = os.getenv("api_key", "AIzaSyBmUrLDjqOzlrpVMUuYKxX00Mb_wdkq34Y")
-model_name = os.getenv("LLM_MODEL", "gemini-1.5-flash")  
+tools = [run_playwright_commands , create_and_save_file]
+
+api_key = os.getenv("api_key", "AIzaSyBIS1dgPIe3H2xuWCDvn6bcsz-n3-Ba2vg")
+model_name = os.getenv("LLM_MODEL", "gemini-1.5-pro-002")  
 server_url = os.getenv("PROXY_SERVER_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent")
 
-# print(f"we are using this API Key: {api_key}")
-# print(f"Hello you are using thisModel Name: {model_name}")
-# print(f"which is running on this Server URL: {server_url}")
-
 try:
-    model = ChatGoogleGenerativeAI(
-        model=model_name, 
-        temperature=0,
-        api_key=api_key,
-        PROXY_SERVER_URL=server_url
-    )
+    # model = ChatGoogleGenerativeAI(
+    #     model=model_name, 
+    #     temperature=0,
+    #     api_key=api_key,
+    #     PROXY_SERVER_URL=server_url
+    # )
+    model = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile" , api_key="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")
 except Exception as e:
     print(f"Error initializing Gemini model: {e}")
     print("Please check your Gemini API key and try again.")
@@ -183,16 +226,43 @@ while True:
         if query.lower() == "exit":
             print("Exiting the application...")
             break
-        final_state = app.invoke(
-            {"messages": [
-                {"role": "system", "content": "You are a quality assurance agent responsible for running available test cases based on user queries. Available test cases include: 'login', 'debug', 'ui', 'headed', 'invalid', 'valid', 'report' and 'json'. For login-related tests, you should use the get_user_credentials tool to collect user information before running the test. Process the query and use the appropriate tools to execute the test case."},
-                {"role": "user", "content": query}
-            ]},
-            config={"configurable": {"thread_id": str(uuid.uuid4())}}
-        )
-        print(final_state["messages"][-1].content)
+       
+#         You are a quality assurance agent responsible for running available test cases and generating test data based on user queries. 
+# Available test cases include: 'login', 'debug', 'ui', 'headed', 'invalid', 'valid', 'report', 'login with credential', 'login with csv', and 'json'.
+# Process the query and use the appropriate tools to execute the test case. If the user queries for login with credential tests, take credentials as input and proceed accordingly
+        
+        # Call the model and get the response
+        try:
+            final_state = app.invoke(
+                {"messages": [
+                    {
+                        "role": "system",
+                        "content": """You are a intelligent agent so route the queries accordingly to different tools.
+                        
+                        Available test cases include: 'login', 'debug', 'ui', 'headed', 'invalid', 'valid', 'report', 'credential', 'generated details', and 'json'.
+                        Process the query and use the appropriate tools to execute the test case. and And if user query to login with credential tests, take credentials as input.
+                        Process the query and use the appropriate tools to execute the test case.
+                        
+                        """
+                    },
+                    {"role": "user", "content": query}
+                ]},
+                config={"configurable": {"thread_id": str(uuid.uuid4())}}
+            )
+            
+        except Exception as invoke_error:
+            print(f"Error invoking the model: {invoke_error}")
+            continue 
+        
+        # Check if the response from the model is empty or invalid
+        if not final_state["messages"] or not final_state["messages"][-1].content.strip():
+            print("Error: The model's response is empty or invalid. Please check the query or model configuration.")
+        else:
+            print("Generated Text:", final_state["messages"][-1].content)
+
     except KeyboardInterrupt:
         print("\nProgram interrupted. Exiting...")
         break
     except Exception as e:
         print(f"An error occurred: {e}")
+

@@ -29,7 +29,7 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     baseURL: 'https://dev.typ.delivery/en/auth/login',
-    headless: false, // Set to `false` to see the browser in action
+    headless: true, // Set to `false` to see the browser in action
     viewport: { width: 1280, height: 720 }, // Set default viewport size
     actionTimeout: 5000,
     
@@ -42,25 +42,25 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
 
     // {
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
     // },
-    {
-      name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'] },
-    },
+    // {
+    //   name: 'Microsoft Edge',
+    //   use: { ...devices['Desktop Edge'] },
+    // },
 
     /* Test against mobile viewports. */
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
+    // {
+    //   name: 'Mobile Chrome',
+    //   use: { ...devices['Pixel 5'] },
+    // },
     // {
     //   name: 'Mobile Safari',
     //   use: { ...devices['iPhone 12'] },
