@@ -34,7 +34,7 @@ def get_test_case(query: str):
     }
     
     if query.lower() in test_cases:
-        print(f"Found test case: {test_cases[query.lower()]}")
+        # print(f"Found test case: {test_cases[query.lower()]}")
         return test_cases[query.lower()]
     
     for key in test_cases:
@@ -45,37 +45,33 @@ def get_test_case(query: str):
     print("No matching test case found. Using default.")
     return test_cases["default"]
 
-# @tool
-# def overwrite_file(test_file: str, new_content: str) -> str:
-#     """This tool overwrites the content of a file with the provided new content."""
-#     try:
-#         os.makedirs(os.path.dirname("tests/test2.spec.js"), exist_ok=True)
-        
-
-#         test_file = os.path.join('tests', 'test2.spec.js')
-#         with open(test_file, 'w') as file:
-#             file.write(new_content)
-        
-#         return f"File '{test_file}' has been successfully overwritten."
-#     except Exception as e:
-#         return f"An error occurred: {e}"
 
 @tool
 def create_and_save_file(testdata: str, content: str, mode: str = 'w'):
-    """Create the folder 'testdata' and file 'testdata.csv' if they don't exist,
-       open it, write content, and save it."""
+    """Create the folder 'testdata' and a file 'testdata.csv',
+       open it once, write the content, and then close it."""
+    
     try:
+        # Ensure the folder structure exists
         folder_name = os.path.dirname(f"testdata/{testdata}")
         if folder_name and not os.path.exists(folder_name):
             os.makedirs(folder_name)
             print(f"The folder '{folder_name}' was created.")
-            
+        
+        # Define the file path
         file_path = os.path.join(folder_name, testdata)
 
+        # Check if the file exists before proceeding
+        if os.path.exists(file_path) and mode == 'w':
+            print(f"File '{file_path}' already exists. Overwriting content.")
+        
+        # Open file once, write content, and automatically close it
         with open(file_path, mode) as file:
             file.write(content)
         
-        print(f"Content has been successfully written to '{testdata}'")
+        # Confirmation message
+        print(f"Content has been successfully written to '{file_path}'")
+
     except Exception as e:
         print(f"An error occurred while handling the file: {e}")
 
@@ -87,7 +83,7 @@ def run_playwright_commands(query: str, credentials: List[Credential]):
     print(f"Test case '{test_case}' detected. Running corresponding Playwright Tests...")
 
     commands = {
-        "valid_logins": {
+        "valid_login": {
             "test_command": "npx playwright test tests/test.spec.js"
         },
         "test_headed": {
@@ -154,7 +150,11 @@ test('login test', async ({{ page }}) => {{
             
             test_command = commands[test_case]["test_command"]
             print(f"Executing command: {test_command}")
-            subprocess.run(test_command.split())
+            try:
+                subprocess.run(test_command, shell=True, check=True, stderr=subprocess.PIPE, timeout=300)
+                print("Playwright test executed successfully!")
+            except subprocess.CalledProcessError as e:
+                print(f"An error occurred while running the test: {str(e)}")
 
         else:
             command = commands.get(test_case)
@@ -174,7 +174,7 @@ test('login test', async ({{ page }}) => {{
 
             except subprocess.CalledProcessError as e:
                 print("\nError occurred during execution:")
-                print(f"Command: {e.cmd}")
+                # print(f"Command: {e.cmd}")
                 print(f"Return Code: {e.returncode}")
                 print(f"Standard Output:\n{e.stdout.decode()}")
                 print(f"Error Message:\n{e.stderr.decode()}")
@@ -185,7 +185,7 @@ test('login test', async ({{ page }}) => {{
 
     except subprocess.CalledProcessError as e:
         print("\nError occurred during execution:")
-        print(f"Command: {e.cmd}")
+        # print(f"Command: {e.cmd}")
         print(f"Return Code: {e.returncode}")
         print(f"Standard Output:\n{e.stdout.decode()}")
         print(f"Error Message:\n{e.stderr.decode()}")
@@ -200,9 +200,9 @@ test('login test', async ({{ page }}) => {{
 
 tools = [run_playwright_commands , create_and_save_file]
 
-api_key = os.getenv("api_key", "AIzaSyBIS1dgPIe3H2xuWCDvn6bcsz-n3-Ba2vg")
-model_name = os.getenv("LLM_MODEL", "gemini-1.5-pro-002")  
-server_url = os.getenv("PROXY_SERVER_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent")
+# api_key = os.getenv("api_key", "AIzaSyBIS1dgPIe3H2xuWCDvn6bcsz-n3-Ba2vg")
+# model_name = os.getenv("LLM_MODEL", "gemini-1.5-pro-002")  
+# server_url = os.getenv("PROXY_SERVER_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent")
 
 try:
     # model = ChatGoogleGenerativeAI(
@@ -211,7 +211,7 @@ try:
     #     api_key=api_key,
     #     PROXY_SERVER_URL=server_url
     # )
-    model = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile" , api_key="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")
+    model = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile" , api_key="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")
 except Exception as e:
     print(f"Error initializing Gemini model: {e}")
     print("Please check your Gemini API key and try again.")
@@ -237,12 +237,12 @@ while True:
                 {"messages": [
                     {
                         "role": "system",
-                        "content": """You are a intelligent agent so route the queries accordingly to different tools.
+                        "content": """You are a intelligent agent so route the queries accordingly to different tools once this create_and_save_file is used based on queries exit from the loop .
                         
                         Available test cases include: 'login', 'debug', 'ui', 'headed', 'invalid', 'valid', 'report', 'credential', 'generated details', and 'json'.
                         Process the query and use the appropriate tools to execute the test case. and And if user query to login with credential tests, take credentials as input.
                         Process the query and use the appropriate tools to execute the test case.
-                        
+   
                         """
                     },
                     {"role": "user", "content": query}
@@ -265,4 +265,3 @@ while True:
         break
     except Exception as e:
         print(f"An error occurred: {e}")
-

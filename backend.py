@@ -1,20 +1,33 @@
 import os
 import subprocess
+import uuid
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
+from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.tools import tool
 import uuid
 from pydantic import BaseModel
 from typing import List
 
 
+app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
+
+
 class Credential(BaseModel):
     email: str
     password: str
-
-
 
 test_cases = []
 
@@ -34,7 +47,7 @@ def get_test_case(query: str):
     }
     
     if query.lower() in test_cases:
-        print(f"Found test case: {test_cases[query.lower()]}")
+        # print(f"Found test case: {test_cases[query.lower()]}")
         return test_cases[query.lower()]
     
     for key in test_cases:
@@ -76,6 +89,7 @@ def create_and_save_file(testdata: str, content: str, mode: str = 'w'):
             file.write(content)
         
         print(f"Content has been successfully written to '{testdata}'")
+        return
     except Exception as e:
         print(f"An error occurred while handling the file: {e}")
 
@@ -87,7 +101,7 @@ def run_playwright_commands(query: str, credentials: List[Credential]):
     print(f"Test case '{test_case}' detected. Running corresponding Playwright Tests...")
 
     commands = {
-        "valid_logins": {
+        "valid_login": {
             "test_command": "npx playwright test tests/test.spec.js"
         },
         "test_headed": {
@@ -154,7 +168,11 @@ test('login test', async ({{ page }}) => {{
             
             test_command = commands[test_case]["test_command"]
             print(f"Executing command: {test_command}")
-            subprocess.run(test_command.split())
+            try:
+                subprocess.run(test_command, shell=True, check=True, stderr=subprocess.PIPE, timeout=300)
+                print("Playwright test executed successfully!")
+            except subprocess.CalledProcessError as e:
+                print(f"An error occurred while running the test: {str(e)}")
 
         else:
             command = commands.get(test_case)
@@ -174,7 +192,7 @@ test('login test', async ({{ page }}) => {{
 
             except subprocess.CalledProcessError as e:
                 print("\nError occurred during execution:")
-                print(f"Command: {e.cmd}")
+                # print(f"Command: {e.cmd}")
                 print(f"Return Code: {e.returncode}")
                 print(f"Standard Output:\n{e.stdout.decode()}")
                 print(f"Error Message:\n{e.stderr.decode()}")
@@ -185,7 +203,7 @@ test('login test', async ({{ page }}) => {{
 
     except subprocess.CalledProcessError as e:
         print("\nError occurred during execution:")
-        print(f"Command: {e.cmd}")
+        # print(f"Command: {e.cmd}")
         print(f"Return Code: {e.returncode}")
         print(f"Standard Output:\n{e.stdout.decode()}")
         print(f"Error Message:\n{e.stderr.decode()}")
@@ -196,73 +214,67 @@ test('login test', async ({{ page }}) => {{
 
     return True
 
-# Define tools
 
-tools = [run_playwright_commands , create_and_save_file]
 
-api_key = os.getenv("api_key", "AIzaSyBIS1dgPIe3H2xuWCDvn6bcsz-n3-Ba2vg")
-model_name = os.getenv("LLM_MODEL", "gemini-1.5-pro-002")  
-server_url = os.getenv("PROXY_SERVER_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent")
+# api_key = os.getenv("api_key", "AIzaSyBIS1dgPIe3H2xuWCDvn6bcsz-n3-Ba2vg")
+# model_name = os.getenv("LLM_MODEL", "gemini-1.5-pro-002")
+# server_url = os.getenv("PROXY_SERVER_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent")
 
-try:
-    # model = ChatGoogleGenerativeAI(
-    #     model=model_name, 
-    #     temperature=0,
-    #     api_key=api_key,
-    #     PROXY_SERVER_URL=server_url
-    # )
-    model = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile" , api_key="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")
-except Exception as e:
-    print(f"Error initializing Gemini model: {e}")
-    print("Please check your Gemini API key and try again.")
-    exit(1)
 
-checkpointer = MemorySaver()
-app = create_react_agent(model, tools, checkpointer=checkpointer)
 
-while True:
+class PromptRequest(BaseModel):
+    prompt: str
+
+# Define the response model
+class AgentResponse(BaseModel):
+    response: str
+    stdout: str = ""  # Add stdout field for test output
+
+# POST endpoint to interact with the agent
+@app.post("/langgraph", response_model=AgentResponse)
+async def langgraph_endpoint(request: PromptRequest):
     try:
-        query = input("Please enter your query or type 'exit' to quit: ")
-        if query.lower() == "exit":
-            print("Exiting the application...")
-            break
-       
-#         You are a quality assurance agent responsible for running available test cases and generating test data based on user queries. 
-# Available test cases include: 'login', 'debug', 'ui', 'headed', 'invalid', 'valid', 'report', 'login with credential', 'login with csv', and 'json'.
-# Process the query and use the appropriate tools to execute the test case. If the user queries for login with credential tests, take credentials as input and proceed accordingly
-        
-        # Call the model and get the response
+        query = request.prompt
+        test_output = ""  # Variable to store test output
+
         try:
-            final_state = app.invoke(
+            model = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile", api_key="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")
+            checkpointer = MemorySaver()
+            agent = create_react_agent(model, tools=[run_playwright_commands, create_and_save_file], checkpointer=checkpointer)
+        except Exception as e:
+            print(f"Error initializing model: {e}")
+            raise
+
+        if not query:
+            raise HTTPException(status_code=400, detail="Prompt is required")
+        
+        # Route the query to the agent
+        try:
+            final_state = agent.invoke(
                 {"messages": [
-                    {
-                        "role": "system",
-                        "content": """You are a intelligent agent so route the queries accordingly to different tools.
+                    {"role":"system","content": """You are a intelligent agent so route the queries accordingly to different tools once this create_and_save_file is used based on queries exit from the loop.
                         
                         Available test cases include: 'login', 'debug', 'ui', 'headed', 'invalid', 'valid', 'report', 'credential', 'generated details', and 'json'.
                         Process the query and use the appropriate tools to execute the test case. and And if user query to login with credential tests, take credentials as input.
                         Process the query and use the appropriate tools to execute the test case.
                         
-                        """
-                    },
+                        """},
                     {"role": "user", "content": query}
                 ]},
                 config={"configurable": {"thread_id": str(uuid.uuid4())}}
             )
-            
         except Exception as invoke_error:
-            print(f"Error invoking the model: {invoke_error}")
-            continue 
-        
-        # Check if the response from the model is empty or invalid
+            raise HTTPException(status_code=500, detail=f"Error invoking the model: {invoke_error}")
+
+        # Check if the response from the model is valid
         if not final_state["messages"] or not final_state["messages"][-1].content.strip():
-            print("Error: The model's response is empty or invalid. Please check the query or model configuration.")
-        else:
-            print("Generated Text:", final_state["messages"][-1].content)
+            raise HTTPException(status_code=500, detail="The model's response is empty or invalid.")
+        # print(final_state)
+        # Return the generated response with test output
+        return AgentResponse(response=final_state["messages"][-1].content, stdout=test_output)
 
-    except KeyboardInterrupt:
-        print("\nProgram interrupted. Exiting...")
-        break
     except Exception as e:
-        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
+# To run the FastAPI app:
+# uvicorn backend:app --reload
