@@ -1,7 +1,7 @@
 {
   "config": {
-    "configFile": "/home/xs427-anksin/Desktop/agentlangraph/playwright.config.js",
-    "rootDir": "/home/xs427-anksin/Desktop/agentlangraph/tests",
+    "configFile": "/home/xs427-anksin/Downloads/agentlangraph/playwright.config.js",
+    "rootDir": "/home/xs427-anksin/Downloads/agentlangraph/tests",
     "forbidOnly": false,
     "fullyParallel": true,
     "globalSetup": null,
@@ -11,7 +11,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 1
+      "actualWorkers": 6
     },
     "preserveOutput": "always",
     "reporter": [
@@ -29,13 +29,13 @@
     "quiet": false,
     "projects": [
       {
-        "outputDir": "/home/xs427-anksin/Desktop/agentlangraph/test-results",
+        "outputDir": "/home/xs427-anksin/Downloads/agentlangraph/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "chromium",
         "name": "chromium",
-        "testDir": "/home/xs427-anksin/Desktop/agentlangraph/tests",
+        "testDir": "/home/xs427-anksin/Downloads/agentlangraph/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -52,51 +52,428 @@
   },
   "suites": [
     {
-      "title": "test.spec.js",
-      "file": "test.spec.js",
+      "title": "csvlogin.spec.js",
+      "file": "csvlogin.spec.js",
       "column": 0,
       "line": 0,
-      "specs": [
+      "specs": [],
+      "suites": [
         {
-          "title": "valid",
-          "ok": true,
-          "tags": [],
-          "tests": [
+          "title": "Login tests from testdata.csv",
+          "file": "csvlogin.spec.js",
+          "line": 15,
+          "column": 8,
+          "specs": [
             {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "chromium",
-              "projectName": "chromium",
-              "results": [
+              "title": "Login with test1@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
                 {
-                  "workerIndex": 0,
-                  "status": "passed",
-                  "duration": 7042,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2025-01-31T10:25:41.024Z",
-                  "attachments": []
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3545,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:45.724Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--f6c24-ogin-with-test1-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
                 }
               ],
-              "status": "expected"
+              "id": "be16149c36ab93d6cfe5-bbffe743849a349758d0",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test2@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "status": "passed",
+                      "duration": 3524,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:45.727Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--02819-ogin-with-test2-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-a3c8c549cd4d9200bad1",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test3@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "passed",
+                      "duration": 3570,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:45.706Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--4ff52-ogin-with-test3-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-429f4fc451c39dd6d04b",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test4@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 3825,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:45.724Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--b439c-ogin-with-test4-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-a850df566440d04df27e",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test5@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 3857,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:45.776Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--2245a-ogin-with-test5-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-0e924f4fdb7c8419c57a",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test6@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "status": "passed",
+                      "duration": 3761,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:45.879Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--086e8-ogin-with-test6-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-2fbb19371f7a6e6d14a8",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test7@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "status": "passed",
+                      "duration": 2659,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:49.699Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--309e1-ogin-with-test7-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-b1fef27dcc84ac6863a2",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test8@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "passed",
+                      "duration": 2510,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:49.718Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--41958-ogin-with-test8-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-c984ad634bd4ed7c9a4f",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test9@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2758,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:49.766Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--10341-ogin-with-test9-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-d486fdc72857428fc088",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
+            },
+            {
+              "title": "Login with test10@example.com",
+              "ok": true,
+              "tags": [
+                "example.com"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 3682,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-02-07T17:35:50.058Z",
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/xs427-anksin/Downloads/agentlangraph/test-results/csvlogin-Login-tests-from--c585b-gin-with-test10-example-com-chromium/video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "be16149c36ab93d6cfe5-faea7e7d8446046de06f",
+              "file": "csvlogin.spec.js",
+              "line": 22,
+              "column": 11
             }
-          ],
-          "id": "31be70adcd52654ff551-d15b4a66599145dbac0f",
-          "file": "test.spec.js",
-          "line": 3,
-          "column": 5
+          ]
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-01-31T10:25:40.194Z",
-    "duration": 8274.007000000001,
-    "expected": 1,
+    "startTime": "2025-02-07T17:35:44.926Z",
+    "duration": 8902.817000000001,
+    "expected": 10,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

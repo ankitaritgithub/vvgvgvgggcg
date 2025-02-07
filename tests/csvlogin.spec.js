@@ -3,12 +3,10 @@ import path from 'path';
 import { test, expect } from '@playwright/test';
 import { parse } from 'csv-parse/sync';
 
-// Helper function to get all CSV files from the "testdata" directory dynamically
 const getCsvFiles = (dirPath) => {
   return fs.readdirSync(dirPath).filter((file) => file.endsWith('.csv'));
 };
 
-// Test setup: Iterate through all CSV files and dynamically create tests
 const directoryPath = path.join(__dirname, '..', 'testdata');
 
 const csvFiles = getCsvFiles(directoryPath);

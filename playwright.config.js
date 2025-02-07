@@ -23,6 +23,7 @@ export default defineConfig({
   reporter : [['json', { outputFile: 'results.json' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    video: 'on',
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
 
@@ -85,3 +86,29 @@ export default defineConfig({
   // },
 });
 
+function extractVideosFromTestResults(directory) {
+    const fs = require('fs');
+    const path = require('path');
+
+    let videoData = {};
+
+    // Read the test-results directory
+    fs.readdirSync(directory).forEach(section => {
+        const sectionPath = path.join(directory, section);
+        if (fs.statSync(sectionPath).isDirectory()) {
+            videoData[section] = [];
+            // Read files in the section
+            fs.readdirSync(sectionPath).forEach(file => {
+                if (file.endsWith('.mp4') || file.endsWith('.avi')) { // Assuming video formats
+                    videoData[section].push(path.join(sectionPath, file));
+                }
+            });
+        }
+    });
+
+    return videoData;
+}
+
+// Example usage:
+// const videos = extractVideosFromTestResults('./test-results');
+// console.log(videos);

@@ -1,0 +1,6 @@
+pip install fastapi
+pip install python-dotenv
+pip install langchain
+pip install langgraph
+pip install playwright
+pip install uvicorn
