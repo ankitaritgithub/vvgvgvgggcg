@@ -1,0 +1,33 @@
+{
+  "prompt": "test  file for csvlogin functionality",
+  "available_files": [
+    "credential.spec.js",
+    "invalidlogin.spec.js",
+    "csvlogin.spec.js"
+  ],
+  "selected_files": [
+    "csvlogin.spec.js"
+  ],
+  "test_results": null,
+  "analysis": {
+    "task_type": "run_tests",
+    "selected_files": [
+      "csvlogin.spec.js"
+    ],
+    "data_generation_required": false,
+    "csv_content": null,
+    "command_type": "test file for csvlogin functionality"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "Available test files: credential.spec.js, invalidlogin.spec.js, csvlogin.spec.js"
+    },
+    {
+      "role": "assistant",
+      "content": "Analysis complete. Task type: run_tests"
+    }
+  ],
+  "error_message": "Test execution failed: ",
+  "conversation_id": "conv_20250210_142817"
+}

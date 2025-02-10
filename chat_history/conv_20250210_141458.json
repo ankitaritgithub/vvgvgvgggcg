@@ -1,0 +1,34 @@
+{
+  "prompt": "Please generate 100 such rows",
+  "available_files": [
+    "credential.spec.js",
+    "invalidlogin.spec.js",
+    "csvlogin.spec.js"
+  ],
+  "selected_files": [],
+  "test_results": null,
+  "analysis": {
+    "task_type": "generate_data",
+    "selected_files": [],
+    "data_generation_required": true,
+    "csv_content": "username,password\nuser1,password1\nuser2,password2\nuser3,password3\nuser4,password4\nuser5,password5\nuser6,password6\nuser7,password7\nuser8,password8\nuser9,password9\nuser10,password10\nuser11,password11\nuser12,password12\nuser13,password13\nuser14,password14\nuser15,password15\nuser16,password16\nuser17,password17\nuser18,password18\nuser19,password19\nuser20,password20\nuser21,password21\nuser22,password22\nuser23,password23\nuser24,password24\nuser25,password25\nuser26,password26\nuser27,password27\nuser28,password28\nuser29,password29\nuser30,password30\nuser31,password31\nuser32,password32\nuser33,password33\nuser34,password34\nuser35,password35\nuser36,password36\nuser37,password37\nuser38,password38\nuser39,password39\nuser40,password40\nuser41,password41\nuser42,password42\nuser43,password43\nuser44,password44\nuser45,password45\nuser46,password46\nuser47,password47\nuser48,password48\nuser49,password49\nuser50,password50\nuser51,password51\nuser52,password52\nuser53,password53\nuser54,password54\nuser55,password55\nuser56,password56\nuser57,password57\nuser58,password58\nuser59,password59\nuser60,password60\nuser61,password61\nuser62,password62\nuser63,password63\nuser64,password64\nuser65,password65\nuser66,password66\nuser67,password67\nuser68,password68\nuser69,password69\nuser70,password70\nuser71,password71\nuser72,password72\nuser73,password73\nuser74,password74\nuser75,password75\nuser76,password76\nuser77,password77\nuser78,password78\nuser79,password79\nuser80,password80\nuser81,password81\nuser82,password82\nuser83,password83\nuser84,password84\nuser85,password85\nuser86,password86\nuser87,password87\nuser88,password88\nuser89,password89\nuser90,password90\nuser91,password91\nuser92,password92\nuser93,password93\nuser94,password94\nuser95,password95\nuser96,password96\nuser97,password97\nuser98,password98\nuser99,password99\nuser100,password100",
+    "command_type": null
+  },
+  "test_content": "username,password\nuser1,password1\nuser2,password2\nuser3,password3\nuser4,password4\nuser5,password5\nuser6,password6\nuser7,password7\nuser8,password8\nuser9,password9\nuser10,password10\nuser11,password11\nuser12,password12\nuser13,password13\nuser14,password14\nuser15,password15\nuser16,password16\nuser17,password17\nuser18,password18\nuser19,password19\nuser20,password20\nuser21,password21\nuser22,password22\nuser23,password23\nuser24,password24\nuser25,password25\nuser26,password26\nuser27,password27\nuser28,password28\nuser29,password29\nuser30,password30\nuser31,password31\nuser32,password32\nuser33,password33\nuser34,password34\nuser35,password35\nuser36,password36\nuser37,password37\nuser38,password38\nuser39,password39\nuser40,password40\nuser41,password41\nuser42,password42\nuser43,password43\nuser44,password44\nuser45,password45\nuser46,password46\nuser47,password47\nuser48,password48\nuser49,password49\nuser50,password50\nuser51,password51\nuser52,password52\nuser53,password53\nuser54,password54\nuser55,password55\nuser56,password56\nuser57,password57\nuser58,password58\nuser59,password59\nuser60,password60\nuser61,password61\nuser62,password62\nuser63,password63\nuser64,password64\nuser65,password65\nuser66,password66\nuser67,password67\nuser68,password68\nuser69,password69\nuser70,password70\nuser71,password71\nuser72,password72\nuser73,password73\nuser74,password74\nuser75,password75\nuser76,password76\nuser77,password77\nuser78,password78\nuser79,password79\nuser80,password80\nuser81,password81\nuser82,password82\nuser83,password83\nuser84,password84\nuser85,password85\nuser86,password86\nuser87,password87\nuser88,password88\nuser89,password89\nuser90,password90\nuser91,password91\nuser92,password92\nuser93,password93\nuser94,password94\nuser95,password95\nuser96,password96\nuser97,password97\nuser98,password98\nuser99,password99\nuser100,password100",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Available test files: credential.spec.js, invalidlogin.spec.js, csvlogin.spec.js"
+    },
+    {
+      "role": "assistant",
+      "content": "Analysis complete. Task type: generate_data"
+    },
+    {
+      "role": "system",
+      "content": "Generated data saved to testdata/testdata.csv"
+    }
+  ],
+  "error_message": null,
+  "conversation_id": "conv_20250210_141458"
+}
