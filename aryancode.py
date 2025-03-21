@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from langgraph.graph import END, START, StateGraph
 from typing_extensions import TypedDict
-
 from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
@@ -16,13 +15,34 @@ class AgentStateDict(TypedDict):
     available_files: Optional[List[str]]
     selected_files: Optional[List[str]]
     test_results: Optional[str]
-    analysis: Optional[str]
+    analysis: Optional[Dict[str, Any]]
     test_content: Optional[str]
     messages: List[Dict[str, str]]
-    error_message: Optional[str]  
+    error_message: Optional[str]
 
 class TestRequest(BaseModel):
     prompt: str
+
+class TestAnalysisResponse(BaseModel):
+    """Structured response for test analysis"""
+    task_type: str = Field(
+        description="Type of task: 'generate_data' or 'run_tests'"
+    )
+    selected_files: List[str] = Field(
+        default_factory=list,
+        description="List of selected test files"
+    )
+    data_generation_required: bool = Field(
+        description="Whether data generation is needed"
+    )
+    csv_content: Optional[str] = Field(
+        default=None,
+        description="CSV content if data generation is required"
+    )
+    command_type: Optional[str] = Field(
+        default=None,
+        description="Type of test command to run (e.g., 'test all', 'debug', etc.)"
+    )
 
 def list_files_in_tests_folder(state: Dict[str, Any]) -> Dict[str, Any]:
     """Lists all test files in the tests folder and updates the state."""
@@ -41,23 +61,30 @@ def list_files_in_tests_folder(state: Dict[str, Any]) -> Dict[str, Any]:
     return state
 
 def analyze_user_prompt(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Analyzes user prompt to determine the required task (test execution or data generation)"""
+    """Analyzes user prompt with structured output"""
     try:
         if not state.get("prompt"):
             state["error_message"] = "No user prompt provided"
             return state
 
         prompt_template = f"""
-        Task:
-        1. Analyze the user request and select the most relevant test files from the available list.
-        2. If the user requests test data generation, generate data in the requested format just give me csv data not any description or anythings csv data should be comma separeted only .
-        3. If the user requests test execution, Please analyze the request and select the most relevant test files from the available list..
-        4. If no specific test file is mentioned, select all available test files.
-        5. Format the response in a structured way.
-
+        Analyze the following request and provide a structured response:
+        
         Available test files: {state.get('available_files', [])}
         User request: {state.get('prompt')}
 
+        Determine if this is a data generation request or a test execution request.
+        For data generation, provide CSV content.
+        For test execution, select relevant test files and command type.
+        
+        Respond in the following JSON format:
+        {{
+            "task_type": "generate_data" or "run_tests",
+            "selected_files": [],
+            "data_generation_required": true/false,
+            "csv_content": "optional csv content",
+            "command_type": "optional command type"
+        }}
         """
 
         model = ChatGroq(
@@ -66,165 +93,117 @@ def analyze_user_prompt(state: Dict[str, Any]) -> Dict[str, Any]:
             api_key="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"
         )
         
-        response = model.invoke(prompt_template)
-        print(response)
+        # Get structured response
+        structured_model = model.with_structured_output(TestAnalysisResponse)
+        response = structured_model.invoke(prompt_template)
         
-        # Parse the response to extract selected files
-        selected_files = []
-        print(selected_files ,"***************************************")
-        for file in state.get('available_files', []):
-            if file in response.content:
-                selected_files.append(file)
-                print(file)
+        # Update state based on structured response
+        state["analysis"] = response.dict()
+        state["selected_files"] = response.selected_files
         
-        state["selected_files"] = selected_files
-        state["analysis"] = response.content
-        state["test_content"] = response.content
-
+        if response.data_generation_required:
+            state["test_content"] = response.csv_content
+        else:
+            state["command_type"] = response.command_type
+            
         if "messages" not in state:
             state["messages"] = []
         state["messages"].append({
             "role": "assistant",
-            "content": f"Analysis complete. Selected files: {', '.join(selected_files)}"
+            "content": f"Analysis complete. Task type: {response.task_type}"
         })
+        
     except Exception as e:
         state["error_message"] = f"Error analyzing prompt: {str(e)}"
     return state
 
-
 def create_and_save_file(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Create the folder 'testdata' and file 'testdata.csv', write content, 
-    then remove first two lines and update the file."""
-    try:
-        folder_name = "testdata"
-        file_path = os.path.join(folder_name, "testdata.csv")
-        
-        if not os.path.exists(folder_name):
-            os.makedirs(folder_name)
-            print(f"Created folder: {folder_name}")
-        
-        with open(file_path, 'w') as file:
-            file.write(state.get("test_content", ""))
-        
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-        
-        if len(lines) > 2:
-            lines = lines[2:]
-        else:
-            lines = []
-        
-        with open(file_path, 'w') as file:
-            file.writelines(lines)
-        
-        print(f"File processed and updated: {file_path}")
+    """Create and save CSV file if data generation is required"""
+    analysis = state.get("analysis", {})
+    if not isinstance(analysis, dict):
+        analysis = analysis.dict()
     
-    except Exception as e:
-        print(f"File handling error: {e}")
+    if analysis.get("data_generation_required"):
+        try:
+            folder_name = "testdata"
+            file_path = os.path.join(folder_name, "testdata.csv")
+            
+            if not os.path.exists(folder_name):
+                os.makedirs(folder_name)
+            
+            with open(file_path, 'w') as file:
+                file.write(state.get("test_content", ""))
+            
+            state["messages"].append({
+                "role": "system",
+                "content": f"Generated data saved to {file_path}"
+            })
+        except Exception as e:
+            state["error_message"] = f"File handling error: {e}"
     
     return state
 
-
-
-
-
-# def create_and_save_file(state: Dict[str, Any]) -> Dict[str, Any]:
-#     """Create the folder 'testdata' and file 'testdata.csv' if they don't exist,
-#        open it, write content, and save it."""
-#     print("h")
-#     try:
-#         folder_name = "testdata"
-#         file_path = os.path.join(folder_name, "testdata.csv")
-        
-#         if not os.path.exists(folder_name):
-#             os.makedirs(folder_name)
-#             print(f"Created folder: {folder_name}")
-        
-#         with open(file_path, 'w') as file:
-#             file.write(state.get("test_content", ""))
-        
-#         print(f"Content saved to {file_path}")
-#     except Exception as e:
-#         print(f"File handling error: {e}")
-#     return state
-
-
 def run_playwright_tests(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Executes Playwright tests based on selected files and user prompt."""
-    if not state.get("selected_files"):
-        state["error_message"] = "No test files selected for execution"
-        return state
+    """Execute Playwright tests based on structured analysis"""
+    analysis = state.get("analysis", {})
+    if not isinstance(analysis, dict):
+        analysis = analysis.dict()
+    
+    if analysis.get("task_type") == "run_tests":
+        try:
+            command_patterns = {
+                "test all": "npx playwright test",
+                "report": "npx playwright test && npx playwright show-report",
+                "debug": "npx playwright test --debug",
+                "ui mode": "npx playwright test --ui",
+                "headed": "npx playwright test --headed",
+                "webkit": "npx playwright test --project=webkit",
+                "firefox": "npx playwright test --project=firefox",
+                "chrome": "npx playwright test --project=chromium"
+            }
+            
+            command_type = analysis.get("command_type", "test all")
+            test_files = " ".join([f"tests/{f}" for f in state.get("selected_files", [])])
+            command = f"{command_patterns.get(command_type, command_patterns['test all'])} {test_files}"
+            
+            test_result = subprocess.run(
+                command,
+                shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=300
+            )
 
-    try:
-        user_prompt = state.get("prompt", "").lower()
-        print(user_prompt)
-        test_file = f"tests/{state['selected_files'][0]}"
-        print(test_file)
-        
-        
-        # Define command patterns dictionary
-        command_patterns = {
-            "test all": f"npx playwright test {test_file}",
-            "report": f"npx playwright show-report",
-            "debug": f"npx playwright test {test_file} --debug",
-            "ui mode": f"npx playwright test --ui",
-            "headed": f"npx playwright test {test_file} --headed",
-            "webkit": f"npx playwright test --project=webkit",
-            "firefox": f"npx playwright test --project=firefox",
-            "chrome": f"npx playwright test --project=chromium"
-        }
-        
-        command = None
-        for pattern, cmd in command_patterns.items():
-            if pattern in user_prompt:
-                command = cmd
-                break
-        
-        
-        if not command:
-            command = command_patterns["test all"]
-        
-        print(f"Executing Playwright command: {command}")
-        
-        test_result = subprocess.run(
-            command,
-            shell=True,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            timeout=300
-        )
-        
-        print("Playwright Tests completed successfully!")
-        print("Output:\n", test_result.stdout)
-        
-        state["test_results"] = test_result.stdout
-        if "messages" not in state:
-            state["messages"] = []
-        state["messages"].append({
-            "role": "system",
-            "content": f"Test execution completed successfully using command: {command}"
-        })
-    except subprocess.CalledProcessError as e:
-        state["error_message"] = f"Test execution failed: {e.stderr}"
-    except subprocess.TimeoutExpired as e:
-        state["error_message"] = f"Test execution timed out after 300 seconds"
-    except Exception as e:
-        state["error_message"] = f"Unexpected error during test execution: {str(e)}"
+            print("Playwright Tests completed successfully!")
+            print("Output:\n", test_result.stdout)
+            
+            state["test_results"] = test_result.stdout
+            state["messages"].append({
+                "role": "system",
+                "content": f"Test execution completed successfully using command: {command}"
+            })
+        except subprocess.CalledProcessError as e:
+            state["error_message"] = f"Test execution failed: {e.stderr}"
+        except subprocess.TimeoutExpired as e:
+            state["error_message"] = f"Test execution timed out after 300 seconds"
+        except Exception as e:
+            state["error_message"] = f"Test execution error: {str(e)}"
+    
     return state
 
 def create_workflow_graph():
-    """Creates the workflow graph with the new execution flow."""
+    """Creates the workflow graph with the execution flow."""
     graph = StateGraph(AgentStateDict)
     
     # Add nodes
     graph.add_node("list_files", list_files_in_tests_folder)
     graph.add_node("analyze_prompt", analyze_user_prompt)
-    graph.add_node("create_and_save_file",create_and_save_file)
+    graph.add_node("create_and_save_file", create_and_save_file)
     graph.add_node("run_tests", run_playwright_tests)
     
-    # Define the new flow
+    # Define the flow
     graph.add_edge(START, "list_files")
     graph.add_edge("list_files", "analyze_prompt")
     graph.add_edge("analyze_prompt", "create_and_save_file")
@@ -239,7 +218,7 @@ async def run_tests(request: TestRequest):
     try:
         workflow = create_workflow_graph()
         
-        # Initialize state as a dictionary
+        # Initialize state
         initial_state = {
             "prompt": request.prompt,
             "available_files": None,

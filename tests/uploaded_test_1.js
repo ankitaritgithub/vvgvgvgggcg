@@ -1,0 +1,1 @@
+console.log('Hello World'); // Simple test file

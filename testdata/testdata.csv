@@ -1,0 +1,11 @@
+email,password,phonenumber,address
+user1@example.com,password1,1234567890,123 Main St
+user2@example.com,password2,9876543210,456 Elm St
+user3@example.com,password3,5555555555,789 Oak St
+user4@example.com,password4,1111111111,321 Pine St
+user5@example.com,password5,2222222222,901 Maple St
+user6@example.com,password6,3333333333,234 Cedar St
+user7@example.com,password7,4444444444,567 Cypress St
+user8@example.com,password8,6666666666,890 Walnut St
+user9@example.com,password9,7777777777,345 Spruce St
+user10@example.com,password10,8888888888,678 Fir St

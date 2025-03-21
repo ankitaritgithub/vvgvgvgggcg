@@ -372,3 +372,5 @@ def run_comparison(query: str):
     return asyncio.get_event_loop().run_until_complete(_run())
 
 # <div class="bg-black px-12 py-6 rounded-r-sm"><span class="Label-sc-15v1nk5-0 gJxZPQ text-lg leading-xxl font-bold text-silverSurfer-100">Login/ Sign up</span><p class="text-sm leading-xxs font-regular text-silverSurfer-100 pb-1.5">Using OTP</p><div class="border border-darkOrange-500 rounded-lg w-10.5"></div><form class="w-71.5 pt-8.1 pb-2.5"><div class="relative flex flex-col pb-12"><input id="multiform" name="multiform" placeholder="Enter Phone number/ Email Id" class="peer p-2.5 text-md leading-base font-regular text-darkOnyx-700 rounded-2xs focus:outline-none focus:shadow-outline border-darkOnyx-400 border placeholder-transparent" value=""><label for="multiform" class="absolute left-0 -top-3.5 text-xs leading-xxs font-regular text-silverSurfer-800 peer-placeholder-shown:text-md peer-placeholder-shown:text-silverSurfer-900 peer-placeholder-shown:top-3 peer-placeholder-shown:pl-2.5 transition-all peer-placeholder-shown:leading-base">Enter Phone number/ Email Id</label></div><button type="submit" class="w-71.5
+#   a b c s d e f  
+ 
