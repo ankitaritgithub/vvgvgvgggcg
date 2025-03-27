@@ -94,6 +94,9 @@ async def run_playwright_zip(zip_file: UploadFile = File(...)):
 # Serve static reports
 from fastapi.staticfiles import StaticFiles
 app.mount("/reports", StaticFiles(directory=BASE_REPORT_PATH), name="reports")
+# Serve static reports
+from fastapi.staticfiles import StaticFiles
+app.mount("/reports", StaticFiles(directory=BASE_REPORT_PATH), name="reports")
 🔒 Security Note
 Make sure the uploaded scripts:
 Can’t access the rest of your pod filesystem.
